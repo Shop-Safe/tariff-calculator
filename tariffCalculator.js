@@ -13,21 +13,38 @@ async function fetchProducts() {
   }
 }
 
-function transformData(products) {
-  const result = { tariffs: {} };
+const tariffData = {
+  ranges: [
+    { start: 0, end: 50000000 },
+    { start: 50000001, end: 100000000 },
+    { start: 100000001, end: 200000000 },
+    { start: 200000001, end: 1000000000 },
+    { start: 1000000001, end: 5000000000 },
+    { start: 5000000001, end: 10000000000 },
+    { start: 10000000001, end: 50000000000 },
+    { start: 50000000001, end: 100000000000 },
+    { start: 100000000001, end: 500000000000 },
+    { start: 500000000001, end: 1000000000000 },
+    { start: 1000000000001, end: 5000000000000 },
+    { start: 5000000000001, end: 10000000000000 },
+    { start: 10000000000001, end: 0 },
+  ],
+  tariffs: {},
+};
 
+function transformData(products) {
   products.forEach((product) => {
     const { type, max_invoice, id, price, name, path_img, descr } = product;
 
-    if (!result.tariffs[type]) {
-      result.tariffs[type] = {};
+    if (!tariffData.tariffs[type]) {
+      tariffData.tariffs[type] = {};
     }
 
-    if (!result.tariffs[type][max_invoice]) {
-      result.tariffs[type][max_invoice] = [];
+    if (!tariffData.tariffs[type][max_invoice]) {
+      tariffData.tariffs[type][max_invoice] = [];
     }
 
-    result.tariffs[type][max_invoice].push({
+    tariffData.tariffs[type][max_invoice].push({
       id,
       price,
       name,
@@ -36,10 +53,10 @@ function transformData(products) {
     });
   });
 
-  for (const type in result.tariffs) {
-    for (const max_invoice in result.tariffs[type]) {
-      while (result.tariffs[type][max_invoice].length < 13) {
-        result.tariffs[type][max_invoice].push({
+  for (const type in tariffData.tariffs) {
+    for (const max_invoice in tariffData.tariffs[type]) {
+      while (tariffData.tariffs[type][max_invoice].length < 13) {
+        tariffData.tariffs[type][max_invoice].push({
           id: null,
           price: 0,
           name: "",
@@ -48,7 +65,7 @@ function transformData(products) {
         });
       }
 
-      result.tariffs[type][max_invoice].sort((a, b) => {
+      tariffData.tariffs[type][max_invoice].sort((a, b) => {
         if (a.price === b.price) {
           return a.id - b.id;
         }
@@ -57,7 +74,7 @@ function transformData(products) {
     }
   }
 
-  return result;
+  return tariffData;
 }
 
 function populateSelect(selectElement, options) {
@@ -208,21 +225,21 @@ document.addEventListener("DOMContentLoaded", async () => {
                     <p id="price_plan" class="mb-2 text-muted"></p>
                   </div>
                 </div>
+                <div id="add_cart" class="row d-none">
+                  <div class="col mt-2">
+                    <button type="button" class="btn btn-outline-primary" id="add-data-0">
+                      <i class="fa-solid fa-cart-shopping"></i> Agregar al carrito
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div id="add_cart" class="d-none justify-content-center align-items-center col-4 mt-2">
-              <a id="add-data-0" type="button"
-                class="btn btn-light btn-lg" onclick="addCart('0')">
-                Añadir al carrito
-              </a>
             </div>
           </div>
         </div>
       </div>
     `;
 
-  const numFacturaOptions = Object.keys(tariffData.tariffs.monthly)
-    .filter((key) => key !== "0")
+  const numFacturaOptions = Object.keys(tariffData.tariffs["annual"])
     .sort((a, b) => a - b)
     .map((key) => ({ value: key, text: parseInt(key).toLocaleString() }));
 
