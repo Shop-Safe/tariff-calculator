@@ -6,7 +6,7 @@ async function fetchProducts() {
     if (!response.ok) {
       throw new Error("Error en la respuesta de la red");
     }
-    return await response.json();
+    return await JSON.parse(response);
   } catch (error) {
     console.error("Error:", error);
     return [];
@@ -164,6 +164,7 @@ function setSelect(type) {
 
 document.addEventListener("DOMContentLoaded", async () => {
   const products = await fetchProducts();
+  console.log(products);
   const tariffData = transformData(products);
 
   document.getElementById("content-calcule").innerHTML = `
